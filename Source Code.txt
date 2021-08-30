@@ -1,0 +1,47 @@
+from bs4 import BeautifulSoup as soup
+from urllib.request import urlopen as uReq
+my_url='https://www.flipkart.com/search?q=iphone&otracker=search&otracker1=search&marketplace=FLIPKART&as-show=on&as=off'
+uClient=uReq(my_url) #graps the web page or url page
+page_html=uClient.read() #dumps or reads all the data and stores in the variable
+uClient.close()  # closing the connection
+page_soup=soup(page_html,"html.parser") # parse the html and search for main class
+containers=page_soup.findAll("div",{"class":"_13oc-S"}) #_13oc-S main class
+#print(len(containers))
+#print(soup.prettify(containers[0])) # printing html code for the first elements
+container=containers[0]
+#print(container.div.img["alt"])
+price=container.findAll("div",{"class":"col col-5-12 nlI3QM"})
+#print(price[0].text)
+'''
+properties=container.findAll("ul",{"class":"_1xgFaf"})
+print(properties[0].text)
+'''
+rating=container.findAll("div",{"class":"gUuXy-"})
+#print(rating[0].text)
+filename="Iphone products.csv"
+f=open(filename,"w")
+headers="Product_Name,Pricing,Rating\n"
+f.write(headers)
+for container in containers:
+    product_name=container.div.img["alt"]
+    price_container=container.findAll("div",{"class":"col col-5-12 nlI3QM"})
+    price=price_container[0].text.strip() #strip eliminates unneccesary commas and spaces
+    rating_container=container.findAll("div",{"class":"gUuXy-"})
+    rating=rating_container[0].text
+    #print("product_name:"+product_name)
+    #print("price_container:"+price)
+    #print("rating:"+rating)
+#string parsing
+    trim_price=''.join(price.split(','))# split my prices
+    rupee=trim_price.split("₹") # replaceing ₹ to Rs
+    add_rs_price="Rs."+rupee[1]
+    split_price=add_rs_price.split('E')#Emi option
+    final_price=split_price[0]
+    split_rating=rating.split(" ")
+    final_rating=split_rating[0]
+    print(product_name.replace(",","|")+","+final_price+","+final_rating+"\n")
+    f.write(product_name.replace(",","|")+","+final_price+","+final_rating+"\n")
+f.close()
+
+
+
